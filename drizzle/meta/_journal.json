@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1773919223110,
+      "tag": "0000_workable_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773921184554,
+      "tag": "0001_motionless_talkback",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773925696270,
+      "tag": "0002_futuristic_arachne",
+      "breakpoints": true
+    }
+  ]
+}
