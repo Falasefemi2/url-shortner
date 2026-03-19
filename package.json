@@ -11,6 +11,7 @@
     "@hono/zod-validator": "^0.7.6",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "effect": "^3.20.0",
     "hono": "^4.12.8",
     "nanoid": "^5.1.7",
     "pg": "^8.20.0",

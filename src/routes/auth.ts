@@ -1,38 +1,58 @@
 import { Hono } from "hono";
 import { loginUser, registerUser } from "../services/auth_service";
+import { Effect } from "effect"
 
 const app = new Hono();
 
 app.post("/register", async (c) => {
-    try {
-        const body = await c.req.json()
-        await registerUser(body)
-        return c.json({
-            message: "Reegisteration successful"
-        })
-    } catch (error: any) {
-        return c.json({ message: error.message || "Registration failed" }, 500)
-    }
+    const body = await c.req.json()
+
+    return Effect.runPromise(
+        registerUser(body).pipe(
+            Effect.match({
+                onFailure: (error) => {
+                    switch (error._tag) {
+                        case "EmailAlreadyExistsError":
+                            return c.json({ message: "Email already taken" }, 400)
+                        case "DatabaseError":
+                            return c.json({ message: "Something went wrong" }, 500)
+                        default:
+                            return c.json({ message: "Registration failed" }, 500)
+                    }
+                },
+                onSuccess: () => c.json({ message: "Registration successful" })
+            })
+        )
+    )
 })
 
+app.post("/login", async (c) => {
+    const { email, password } = await c.req.json()
 
-app.post('/login', async (c) => {
-    try {
-        const { email, password } = await c.req.json()
-        const { token, user } = await loginUser(email, password)
-        const safeUser = {
-            id: user.id,
-            email: user.email,
-        }
-        return c.json(
-            {
-                message: "Login successful",
-                token,
-                user: safeUser
+    return Effect.runPromise(
+        loginUser(email, password).pipe(
+            Effect.match({
+                onFailure: (error) => {
+                    switch (error._tag) {
+                        case "UserNotFound":
+                            return c.json({ message: "Invalid credentials" }, 401)
+                        case "InvalidPassword":
+                            return c.json({ message: "Invalid credentials" }, 401)
+                        case "DatabaseError":
+                            return c.json({ message: "Something went wrong" }, 500)
+                        default:
+                            return c.json({ message: "Login failed" }, 500)
+                    }
+                },
+                onSuccess: ({ token, user }) =>
+                    c.json({
+                        message: "Login successful",
+                        token,
+                        user: { id: user.id, email: user.email }
+                    })
             })
-    } catch (error: any) {
-        return c.json({ message: error.message || "Login failed" }, 401)
-    }
+        )
+    )
 })
 
 export default app
